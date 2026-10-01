@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lucky AI — Math Solver</title>
+<style>
+:root{color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Arial;background:#eef3ff;color:#17213b}
+.app{min-height:100vh;background:linear-gradient(135deg,#f7f9ff,#eaf1ff);padding:28px}
+.wrap{max-width:1050px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.brand{font-weight:800;font-size:25px}.brand span{color:#526dff}
+.badge{background:#e8ecff;color:#4258d8;padding:8px 13px;border-radius:99px;font-size:13px;font-weight:700}
+.hero{text-align:center;margin:35px 0 25px}
+.hero h1{font-size:46px;margin:0 0 10px;letter-spacing:-1.5px}
+.hero p{color:#68738f;font-size:17px}
+.panel{background:white;border:1px solid #dfe5f5;border-radius:24px;padding:22px;box-shadow:0 15px 45px #2b4ca018}
+.input{display:flex;gap:10px;background:#f6f8fd;border:1px solid #dce3f3;border-radius:17px;padding:10px}
+.input textarea{flex:1;border:0;outline:0;background:transparent;resize:none;font-size:17px;padding:12px;min-height:65px;color:inherit}
+.btn{border:0;border-radius:13px;background:#526dff;color:white;padding:0 24px;font-weight:800;font-size:15px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.chip{border:1px solid #dce3f3;background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;color:#52607c}
+.answer{margin-top:20px;display:none}.answer h3{margin:0 0 12px}
+.box{background:#f7f9ff;border:1px solid #e0e6f4;border-radius:15px;padding:18px;line-height:1.7;white-space:pre-wrap}
+.topics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
+.topic{padding:13px;border:1px solid #e0e6f4;border-radius:13px;text-align:center;background:#fff;font-size:13px;font-weight:650}
+.footer{text-align:center;color:#7a849d;margin:25px;font-size:13px}
+@media(max-width:700px){.app{padding:16px}.hero h1{font-size:34px}.topics{grid-template-columns:repeat(2,1fr)}.input{flex-direction:column}.btn{height:48px}}
+@media(prefers-color-scheme:dark){.app{background:#0d1220;color:#eef2ff}.panel,.topic{background:#151c2e;border-color:#29334d}.input,.box{background:#101727;border-color:#29334d}.chip{background:#151c2e;color:#bdc7df;border-color:#29334d}.hero p,.footer{color:#96a1bb}.badge{background:#20294a;color:#9eacff}}
+</style>
+</head>
+<body>
+<main class="app"><div class="wrap">
+<header class="top"><div class="brand">✦ Lucky<span> AI</span></div><div class="badge">Class 10 • Math Solver</div></header>
+<section class="hero"><h1>Ask. Solve. Understand.</h1><p>Your fast mathematical assistant — equations, algebra, percentages, geometry & trigonometry.</p></section>
+<section class="panel">
+<div class="input"><textarea id="q" placeholder="Type a question… e.g. Solve 2x + 5 = 15"></textarea><button class="btn" onclick="solve()">Solve ✨</button></div>
+<div class="chips">
+<button class="chip" onclick="setQ('Solve 2x + 5 = 15')">Linear equation</button>
+<button class="chip" onclick="setQ('x² - 5x + 6 = 0')">Quadratic</button>
+<button class="chip" onclick="setQ('sin 30° + cos 60°')">Trigonometry</button>
+<button class="chip" onclick="setQ('Find 20% of 450')">Percentage</button>
+<button class="chip" onclick="setQ('Area of circle radius 7')">Circle area</button>
+<button class="chip" onclick="setQ('Mean of 10, 20, 30, 40')">Mean</button>
+</div>
+<div class="answer" id="ans"><h3>Lucky AI Solution</h3><div class="box" id="out"></div></div>
+<div class="topics"><div class="topic">Real Numbers</div><div class="topic">Polynomials</div><div class="topic">Equations</div><div class="topic">Trigonometry</div><div class="topic">Statistics</div></div>
+</section>
+<div class="footer">Lucky AI • Fast offline math engine • Check important answers</div>
+</div></main>
+<script>
+function setQ(x){document.getElementById('q').value=x;document.getElementById('q').focus()}
+function num(s){return Number(String(s).replace(/,/g,''))}
+function fmt(n){return Number.isInteger(n)?String(n):String(Math.round(n*1000000)/1000000)}
+function solve(){
+ let q=document.getElementById('q').value.trim(),o=document.getElementById('out'),a=document.getElementById('ans');if(!q)return;
+ let z=q.toLowerCase().replace(/[−–]/g,'-').replace(/²/g,'^2').replace(/°/g,'');let s='';
+ let pm=z.match(/(?:find\s+)?(\d+(?:\.\d+)?)\s*%\s*(?:of|from)\s*(\d+(?:\.\d+)?)/);
+ let lm=z.match(/(?:solve\s+)?(-?\d*\.?\d*)\s*x\s*([+-])\s*(\d+(?:\.\d+)?)\s*=\s*(-?\d+(?:\.\d+)?)/);
+ let qm=z.match(/x\^2\s*([+-])\s*(\d+(?:\.\d+)?)\s*x\s*([+-])\s*(\d+(?:\.\d+)?)\s*=\s*0/);
+ let trig=z.match(/(sin|cos|tan)\s*(0|30|45|60|90)/);
+ let circle=z.match(/(?:area.*circle|circle.*area).*?(?:radius|r)\s*=\s*(\d+(?:\.\d+)?)/);
+ let mean=z.match(/mean.*?((?:\d+(?:\.\d+)?\s*,?\s*)+)/);
+ if(pm){let p=num(pm[1]),v=num(pm[2]),ans=p*v/100;s='Percentage\n\n= ('+p+'/100) × '+v+'\n= '+fmt(ans)+'\n\n✓ Answer: '+fmt(ans)}
+ else if(lm){let A=lm[1]===''||lm[1]==='-'?Number(lm[1]+'1'):num(lm[1]),B=(lm[2]==='+'?1:-1)*num(lm[3]),C=num(lm[4]),x=(C-B)/A;s='Linear equation\n\n'+A+'x '+(B>=0?'+ ':'- ')+Math.abs(B)+' = '+C+'\n\n'+A+'x = '+fmt(C-B)+'\nx = ('+fmt(C-B)+') / '+A+'\n\n✓ Answer: x = '+fmt(x)}
+ else if(qm){let b=(qm[1]==='+'?1:-1)*num(qm[2]),c=(qm[3]==='+'?1:-1)*num(qm[4]),d=b*b-4*c;if(d<0)s='Quadratic equation\n\nDiscriminant = b² − 4ac = '+fmt(d)+'\n\n✓ No real roots';else{let r1=(-b+Math.sqrt(d))/2,r2=(-b-Math.sqrt(d))/2;s='Quadratic equation\n\nDiscriminant = b² − 4ac\n= '+fmt(d)+'\n\nUsing x = (−b ± √D) / 2a\n\n✓ Answers: x = '+fmt(r1)+' and x = '+fmt(r2)}}
+ else if(trig){let table={sin:{0:0,30:.5,45:Math.SQRT1_2,60:Math.sqrt(3)/2,90:1},cos:{0:1,30:Math.sqrt(3)/2,45:Math.SQRT1_2,60:.5,90:0},tan:{0:0,30:1/Math.sqrt(3),45:1,60:Math.sqrt(3),90:Infinity}};let v=table[trig[1]][trig[2]];s=trig[1]+' '+trig[2]+'°\n\n✓ Answer: '+(v===Infinity?'undefined':fmt(v))}
+ else if(circle){let r=num(circle[1]),ans=Math.PI*r*r;s='Area of circle\n\nA = πr²\n= π × '+r+'²\n≈ '+fmt(ans)+' square units\n\n✓ Answer: '+fmt(ans)+' square units'}
+ else if(mean){let a1=mean[1].match(/\d+(?:\.\d+)?/g)||[],sum=a1.reduce((x,y)=>x+num(y),0);s='Mean\n\nMean = Sum of observations / Number of observations\n= '+fmt(sum)+' / '+a1.length+'\n\n✓ Answer: '+fmt(sum/a1.length)}
+ else{s='I can calculate many common Class 10 problems offline. Try:\n\n• Linear equations\n• Quadratic equations\n• Percentages\n• Trigonometric values\n• Circle area\n• Mean / statistics\n\nFor advanced word problems, send the complete question.'}
+ o.textContent=s;a.style.display='block'
+}
+</script>
+</body>
+</html>
